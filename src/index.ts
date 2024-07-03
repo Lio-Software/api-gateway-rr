@@ -14,12 +14,14 @@ app.use(morgan("dev"));
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || "/api/v1";
 
-app.use(`${API_PREFIX}/auth`, proxy("http://localhost:3001/api/v1/auth", {
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
+
+app.use(`${API_PREFIX}/auth`, proxy(`${AUTH_SERVICE_URL}/api/v1/auth`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/auth${req.url}`;
     }
 }));
 
 app.listen(PORT, () => {
-    signale.success(`Server running on http://localhost:${PORT}`);
+    signale.success(`Server running on http://localhost:${PORT}${API_PREFIX}`);
 });
