@@ -1,0 +1,25 @@
+import express, { Application } from "express";
+import morgan from "morgan";
+
+import dotenv from "dotenv";
+import { Signale } from "signale";
+import proxy from "express-http-proxy";
+
+const app: Application = express();
+const signale = new Signale();
+
+dotenv.config();
+
+app.use(morgan("dev"));
+const PORT = process.env.PORT || 3000;
+const API_PREFIX = process.env.API_PREFIX || "/api/v1";
+
+app.use(`${API_PREFIX}/auth`, proxy("http://localhost:3001/api/v1/auth", {
+    proxyReqPathResolver: (req) => {
+        return `/api/v1/auth${req.url}`;
+    }
+}));
+
+app.listen(PORT, () => {
+    signale.success(`Server running on http://localhost:${PORT}`);
+});
