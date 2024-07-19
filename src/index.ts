@@ -28,25 +28,30 @@ app.use(`${API_PREFIX}/auth`, proxy(`${AUTH_SERVICE_URL}/api/v1/auth`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/auth${req.url}`;
     },
-    preserveHostHdr: true,
-    parseReqBody: false,
 }));
 
 app.use(`${API_PREFIX}/users`, proxy(`${USER_SERVICE_URL}/api/v1/users`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/users${req.url}`;
     },
-    preserveHostHdr: true,
-    parseReqBody: false,
 }));
+
+app.use(`${API_PREFIX}/vehicles/images/upload`, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles/images/upload`,
+    {
+        proxyReqPathResolver: (req) => {
+            return `/api/v1/vehicles/images/upload${req.url}`;
+        },
+        preserveHostHdr: true,
+        parseReqBody: false,
+    }
+));
 
 app.use(`${API_PREFIX}/vehicles`, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/vehicles${req.url}`;
-    },
-    preserveHostHdr: true,
-    parseReqBody: false,
+    }
 }));
+
 
 app.listen(PORT, () => {
     signale.success(`Server running on http://localhost:${PORT}${API_PREFIX}`);
