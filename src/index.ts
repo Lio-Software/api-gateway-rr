@@ -53,6 +53,10 @@ const checkAuthAndForward = async (req: Request, res: Response, next: NextFuncti
     next();
 };
 
+app.get(`${API_PREFIX}/hello`, (req: Request, res: Response) => {
+    res.send("Hello World");
+});
+
 
 app.use(`${API_PREFIX}/auth`, proxy(`${AUTH_SERVICE_URL}/api/v1/auth`, {
     proxyReqPathResolver: (req) => {
