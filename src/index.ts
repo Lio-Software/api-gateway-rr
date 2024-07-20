@@ -5,6 +5,8 @@ import morgan from "morgan";
 import { } from "../tsconfig.json";
 import cors from "cors";
 import proxy from "express-http-proxy";
+import { Request, Response, NextFunction } from "express";
+import axios from "axios";
 
 const app = express();
 const signale = new Signale();
@@ -24,19 +26,47 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001"
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3002";
 const VEHICLE_SERVICE_URL = process.env.VEHICLE_SERVICE_URL || "http://localhost:3003";
 
+
+const verifyToken = async (token: string): Promise<boolean> => {
+    try {
+        const response = await axios.post(`${AUTH_SERVICE_URL}/api/v1/auth/verify_token`, { accessToken: token });
+        return response.data.data.valid === true;
+    } catch (error) {
+        console.error("Error verifying token:", error);
+        return false;
+    }
+};
+
+const checkAuthAndForward = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).send('No autorizado');
+    }
+
+    const token = authHeader.split(' ')[1];
+    const isValidToken = await verifyToken(token);
+
+    if (!isValidToken) {
+        return res.status(401).send('Token inválido');
+    }
+
+    next();
+};
+
+
 app.use(`${API_PREFIX}/auth`, proxy(`${AUTH_SERVICE_URL}/api/v1/auth`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/auth${req.url}`;
     },
 }));
 
-app.use(`${API_PREFIX}/users`, proxy(`${USER_SERVICE_URL}/api/v1/users`, {
+app.use(`${API_PREFIX}/users`, checkAuthAndForward, proxy(`${USER_SERVICE_URL}/api/v1/users`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/users${req.url}`;
     },
 }));
 
-app.use(`${API_PREFIX}/vehicles/images/upload`, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles/images/upload`,
+app.use(`${API_PREFIX}/vehicles/images/upload`, checkAuthAndForward, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles/images/upload`,
     {
         proxyReqPathResolver: (req) => {
             return `/api/v1/vehicles/images/upload${req.url}`;
@@ -46,7 +76,7 @@ app.use(`${API_PREFIX}/vehicles/images/upload`, proxy(`${VEHICLE_SERVICE_URL}/ap
     }
 ));
 
-app.use(`${API_PREFIX}/vehicles`, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles`, {
+app.use(`${API_PREFIX}/vehicles`, checkAuthAndForward, proxy(`${VEHICLE_SERVICE_URL}/api/v1/vehicles`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/vehicles${req.url}`;
     }
