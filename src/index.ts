@@ -25,6 +25,8 @@ app.use(cors());
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3002";
 const VEHICLE_SERVICE_URL = process.env.VEHICLE_SERVICE_URL || "http://localhost:3003";
+const RENTAL_SERVICE_URL = process.env.RENTAL_SERVICE_URL || "http://localhost:3004";
+const SENTIMENT_ANALIZER_URL = process.env.SENTIMENT_ANALIZER_URL || "http://localhost:3005";
 
 
 const verifyToken = async (token: string): Promise<boolean> => {
@@ -53,7 +55,7 @@ const checkAuthAndForward = async (req: Request, res: Response, next: NextFuncti
     next();
 };
 
-app.get(`${API_PREFIX}/hello`, (req: Request, res: Response) => {
+app.get(`${API_PREFIX}/`, (req: Request, res: Response) => {
     res.send("Hello World");
 });
 
@@ -86,6 +88,17 @@ app.use(`${API_PREFIX}/vehicles`, checkAuthAndForward, proxy(`${VEHICLE_SERVICE_
     }
 }));
 
+app.use(`${API_PREFIX}/rentals`, checkAuthAndForward, proxy(`${RENTAL_SERVICE_URL}/api/v1/rentals`, {
+    proxyReqPathResolver: (req) => {
+        return `/api/v1/rentals${req.url}`;
+    }
+}));
+
+app.use(`${API_PREFIX}/sentiment`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/sentiment`, {
+    proxyReqPathResolver: (req) => {
+        return `/api/v1/sentiment`;
+    }
+}));
 
 app.listen(PORT, () => {
     signale.success(`Server running on http://localhost:${PORT}${API_PREFIX}`);
