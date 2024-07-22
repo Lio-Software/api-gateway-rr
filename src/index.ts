@@ -100,6 +100,12 @@ app.use(`${API_PREFIX}/sentiment`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/senti
     }
 }));
 
+app.use(`${API_PREFIX}/sentiment/time_df`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/sentiment/time_df`, {
+    proxyReqPathResolver: (req) => {
+        return `/api/v1/sentiment/time_df`;
+    }
+}));
+
 app.listen(PORT, () => {
     signale.success(`Server running on http://localhost:${PORT}${API_PREFIX}`);
 });
