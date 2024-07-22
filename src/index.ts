@@ -94,15 +94,15 @@ app.use(`${API_PREFIX}/rentals`, checkAuthAndForward, proxy(`${RENTAL_SERVICE_UR
     }
 }));
 
-app.use(`${API_PREFIX}/sentiment`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/sentiment`, {
-    proxyReqPathResolver: (req) => {
-        return `/api/v1/sentiment`;
-    }
-}));
-
 app.use(`${API_PREFIX}/sentiment/time_df`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/sentiment/time_df`, {
     proxyReqPathResolver: (req) => {
         return `/api/v1/sentiment/time_df`;
+    }
+}));
+
+app.use(`${API_PREFIX}/sentiment`, proxy(`${SENTIMENT_ANALIZER_URL}/api/v1/sentiment`, {
+    proxyReqPathResolver: (req) => {
+        return `/api/v1/sentiment`;
     }
 }));
 
